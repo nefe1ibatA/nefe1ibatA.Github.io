@@ -12,14 +12,16 @@
     
     <meta name="keywords" content="" />
     
-    <meta property="og:type" content="article">
+    <meta name="description" content="Abstract传统的单目标跨域推荐仅仅只能够通过使用源域的丰富数据来帮助目标域提升推荐准确性。而本文关注的重点是如何同时提升两个域的推荐准确性，即如何进行dual-target CDR。该问题的难点在于：  如何生成更加有效的user embeddings和item embeddings。 如何能够更有效地优化两个域中的embeddings。  本文对于此问题提出了一种名为GA-DTCDR的模">
+<meta property="og:type" content="article">
 <meta property="og:title" content="A Graphical and Attentional Framework for Dual-Target Cross-Domain Recommendation">
 <meta property="og:url" content="https://nefe1ibata.github.io/2021/11/27/A-Graphical-and-Attentional-Framework-for-Dual-Target-Cross-Domain-Recommendation/index.html">
 <meta property="og:site_name" content="nefe1ibatA&#39;s blog">
+<meta property="og:description" content="Abstract传统的单目标跨域推荐仅仅只能够通过使用源域的丰富数据来帮助目标域提升推荐准确性。而本文关注的重点是如何同时提升两个域的推荐准确性，即如何进行dual-target CDR。该问题的难点在于：  如何生成更加有效的user embeddings和item embeddings。 如何能够更有效地优化两个域中的embeddings。  本文对于此问题提出了一种名为GA-DTCDR的模">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://nefe1ibata.github.io/2021/11/27/A-Graphical-and-Attentional-Framework-for-Dual-Target-Cross-Domain-Recommendation/cover.png">
 <meta property="article:published_time" content="2021-11-27T10:11:52.000Z">
-<meta property="article:modified_time" content="2021-11-27T11:15:59.516Z">
+<meta property="article:modified_time" content="2021-11-27T13:56:52.914Z">
 <meta property="article:author" content="nefelibatA">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://nefe1ibata.github.io/2021/11/27/A-Graphical-and-Attentional-Framework-for-Dual-Target-Cross-Domain-Recommendation/cover.png">
@@ -181,7 +183,7 @@
 <div class="article-date">
   <i class="fa fa-calendar-plus-o"></i>
   <a href="/2021/11/27/A-Graphical-and-Attentional-Framework-for-Dual-Target-Cross-Domain-Recommendation/" class="article-date">
-     <time datetime="2021-11-27T11:15:59.516Z" itemprop="dateModified">2021-11-27</time>
+     <time datetime="2021-11-27T13:56:52.914Z" itemprop="dateModified">2021-11-27</time>
   </a>
 </div>
 
@@ -204,6 +206,25 @@
             
 
             <p><img src="/2021/11/27/A-Graphical-and-Attentional-Framework-for-Dual-Target-Cross-Domain-Recommendation/cover.png"></p>
+<h2 id="Abstract"><a href="#Abstract" class="headerlink" title="Abstract"></a>Abstract</h2><p>传统的单目标跨域推荐仅仅只能够通过使用源域的丰富数据来帮助目标域提升推荐准确性。<br>而本文关注的重点是如何同时提升两个域的推荐准确性，即如何进行dual-target CDR。<br>该问题的难点在于：</p>
+<ul>
+<li>如何生成更加有效的user embeddings和item embeddings。</li>
+<li>如何能够更有效地优化两个域中的embeddings。</li>
+</ul>
+<p>本文对于此问题提出了一种名为GA-DTCDR的模型。</p>
+<h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>对于传统的single-target CDR来说，是通过将Richer Domain的数据学习到的结果用于Sparser Domain。<br>那么一个主观的想法是，能不能仅仅加上一个传播的方向，”Sparser2Richer”，就能够模型在两个域的推荐效果都得到提升呢？<br>但实际上这并不可行，因为Richer的模型通常效果好于Sparser的模型，因此直接这样做更大的可能是Richer Domain的效果还会变差。<br>因此需要寻求更加有效的方法，来提高两个域的输入的丰富性，这个方法就是<strong>G</strong>raphical and <strong>A</strong>ttentional framework for <strong>D</strong>ual-<strong>T</strong>arget <strong>C</strong>ross-<strong>D</strong>omain <strong>R</strong>ecommendation。</p>
+<h2 id="The-Proposed-Model"><a href="#The-Proposed-Model" class="headerlink" title="The Proposed Model"></a>The Proposed Model</h2><p><img src="/2021/11/27/A-Graphical-and-Attentional-Framework-for-Dual-Target-Cross-Domain-Recommendation/model.png"></p>
+<h3 id="Input-Layer"><a href="#Input-Layer" class="headerlink" title="Input Layer"></a>Input Layer</h3><p>文章同时考虑了显式反馈和其它信息，并将其分为两类，一类是rating information，另一类是content information，可以理解为数值类和文本类。</p>
+<h3 id="Graph-Embedding-Layer"><a href="#Graph-Embedding-Layer" class="headerlink" title="Graph Embedding Layer"></a>Graph Embedding Layer</h3><h4 id="Document-Embedding"><a href="#Document-Embedding" class="headerlink" title="Document Embedding"></a>Document Embedding</h4><p>首先为了生成用户和商品之间的异构图，需要将用户和商品之间相似度计算出来。我们收集每个节点的所有的文本类信息，通过Doc2vec得到text vector矩阵。</p>
+<h4 id="Graph-Construction"><a href="#Graph-Construction" class="headerlink" title="Graph Construction"></a>Graph Construction</h4><ol>
+<li>通过User和Item之间的打分交互来连接User和Item，边的权重采用归一化评分$$R/max(R)$$进行赋值</li>
+<li>对于User和User或是Item和Item之间，通过text vector的相似度进行选择性地生成边。</li>
+</ol>
+<h4 id="Output"><a href="#Output" class="headerlink" title="Output"></a>Output</h4><p>将异构图输入Node2Vec等graph embedding model，可以得到user embedding matrix和item embedding matrix。</p>
+<h3 id="Feature-Combination-Layer"><a href="#Feature-Combination-Layer" class="headerlink" title="Feature Combination Layer"></a>Feature Combination Layer</h3><p>使用element-wise attention将两个域中的User特征进行交互。</p>
+<h3 id="Training-for-Neural-Network-Layers-and-Output-Layer"><a href="#Training-for-Neural-Network-Layers-and-Output-Layer" class="headerlink" title="Training for Neural Network Layers and Output Layer"></a>Training for Neural Network Layers and Output Layer</h3><p>对于任意一组user和item，计算二者之间的相似度，就是本文对于其交互结果的预测值。而交互结果的真值在有评分的情况下就是评分，如果没有评分，进行负采样，即设置一部分空值为0。</p>
+<p>损失函数采用归一化交叉熵：<br>$$\ell (y,\hat y)=\frac{y}{max(R)}\log \hat y+(1-\frac{y}{max(R)})\log (1-\hat y)$$</p>
+<h2 id="Experiments"><a href="#Experiments" class="headerlink" title="Experiments"></a>Experiments</h2><p>该模型在多个数据集上取得了较好的结果。</p>
 
         </div>
         <footer class="article-footer">
@@ -290,8 +311,13 @@
         "dateModified": "2021-11-27",
         "url": "https://nefe1ibatA.github.io/2021/11/27/A-Graphical-and-Attentional-Framework-for-Dual-Target-Cross-Domain-Recommendation/",
         "description": "
-",
-        "wordCount": 2
+Abstract传统的单目标跨域推荐仅仅只能够通过使用源域的丰富数据来帮助目标域提升推荐准确性。而本文关注的重点是如何同时提升两个域的推荐准确性，即如何进行dual-target CDR。该问题的难点在于：
+
+如何生成更加有效的user embeddings和item embeddings。
+如何能够更有效地优化两个域中的embeddings。
+
+本文对于此问题提出了一种名为GA-DTCDR的模",
+        "wordCount": 110
     }
 </script>
 
@@ -567,6 +593,13 @@
 <script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
 
     
+    
+        <script type="text/x-mathjax-config">
+            MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']] } });
+        </script>
+        
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML.js"></script>
+
     
 
     
